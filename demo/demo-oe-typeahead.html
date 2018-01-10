@@ -28,13 +28,25 @@
 <body unresolved>
 
   <div class="vertical-section-container centered">
-    <h3>Typeahead</h3>
+    <h3>Typeahead - String</h3>
     <demo-snippet>
       <template>
 
         <template is="dom-bind">
-          <oe-typeahead label="Search..." displayproperty="description" valueproperty="code" searchurl="data/country/SEARCH_STRING.json"
-            dataurl="data/country/VALUE_STRING.json" value="{{value}}"></oe-typeahead>
+          <oe-typeahead label="Search..." searchurl="../data/list/SEARCH_STRING.json"
+            dataurl="../data/list/VALUE_STRING.json" value="{{value}}"></oe-typeahead>
+          <label>[[value]]</label>
+        </template>
+      </template>
+    </demo-snippet>
+
+    <h3>Typeahead - Object</h3>
+    <demo-snippet>
+      <template>
+
+        <template is="dom-bind">
+          <oe-typeahead label="Search..." displayproperty="description" valueproperty="code" searchurl="../data/country/SEARCH_STRING.json"
+            dataurl="../data/country/VALUE_STRING.json" value="{{value}}"></oe-typeahead>
           <label>[[value]]</label>
         </template>
       </template>
@@ -45,8 +57,8 @@
       <template>
 
         <template is="dom-bind">
-          <oe-typeahead label="Search..." displayproperty="description" valueproperty="code" searchurl="data/country/SEARCH_STRING.json"
-            dataurl="data/country/VALUE_STRING.json" value="{{value}}" required></oe-typeahead>
+          <oe-typeahead label="Search..." displayproperty="description" valueproperty="code" searchurl="../data/country/SEARCH_STRING.json"
+            dataurl="../data/country/VALUE_STRING.json" value="{{value}}" required></oe-typeahead>
           <label>[[value]]</label>
         </template>
       </template>
@@ -56,8 +68,8 @@
     <demo-snippet>
       <template>
         <template is="dom-bind">
-          <oe-typeahead strict label="Search..." no-data-found={{noDataFound}} displayproperty="description" valueproperty="code" searchurl="data/country/SEARCH_STRING.json"
-            dataurl="data/country/VALUE_STRING.json" value="{{value}}" required></oe-typeahead>
+          <oe-typeahead strict label="Search..." no-data-found={{noDataFound}} displayproperty="description" valueproperty="code" searchurl="../data/country/SEARCH_STRING.json"
+            dataurl="../data/country/VALUE_STRING.json" value="{{value}}" required></oe-typeahead>
           <label>[[value]]</label>
         </template>
       </template>
