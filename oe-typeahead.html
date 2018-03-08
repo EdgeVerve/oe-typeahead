@@ -377,6 +377,10 @@ An element which provides suggestions while typing input.
           this.value = item;
         }
 
+        if(!this.multiple){
+          this.$.dropdown.set('opened',false);
+        }
+
         if (this.noDataFound) {
           this.set('_suggestions', []);
         }
