@@ -211,10 +211,7 @@ An element which provides suggestions while typing input.
         * @param {event} e
         */
       _onBlur: function (e) { // eslint-disable-line no-unused-vars
-        if (!this._suggestions) {
           this.validate();
-        }
-        // this.set('_suggestions', []);
       },
       _onFocus: function (e) { // eslint-disable-line no-unused-vars
         this.inputElement.select();
@@ -254,7 +251,7 @@ An element which provides suggestions while typing input.
         } else {
           self.noDataFound = false;
           var data = e.detail.response;
-          var newValue = data.find(function(ele) {
+          var newValue = data.length===1?data[0]:data.find(function(ele) {
             if (typeof ele === 'string' && ele === self.searchString) {
               return true;
             } else if (typeof ele === 'object' && self.displayproperty 
@@ -266,6 +263,7 @@ An element which provides suggestions while typing input.
           });
           if (newValue) {
             self._setSelectedItem(newValue);
+            self.validate();
           }
         }
       },
@@ -340,6 +338,8 @@ An element which provides suggestions while typing input.
           e.stopPropagation();
         } else if (e.keyCode == 13 && this._suggestions.length) {
           e.stopPropagation();
+        } else if (e.keyCode == 9 && this._suggestions.length) {
+          this.set('_suggestions',[]);
         }
       },
       /**
