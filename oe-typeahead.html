@@ -374,7 +374,8 @@ An element which provides suggestions while typing input.
           this.value = item ? item[this.valueproperty] : undefined;
         } else {
           this.value = item;
-        }
+        } 
+        this.fire('pt-item-confirmed', item);
 
         if(!this.multiple){
           this.$.dropdown.set('opened',false);
