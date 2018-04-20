@@ -37,10 +37,6 @@ An element which provides suggestions while typing input.
       display: block;
     }
 
-    paper-menu {
-      max-height: 240px;
-      overflow: auto;
-    }
 
     paper-item {
       cursor: pointer;
@@ -60,7 +56,10 @@ An element which provides suggestions while typing input.
         background-color: #ccc;
       }
     }
-
+    
+    .dropdown-content > ::content{
+      max-height: 240px;
+    }
   </style>
   <template>
     <oe-ajax id="iajax" auto url=[[_getRequestUrl(searchString)]] last-response={{_suggestions}} on-response="_onAjaxResponse"
