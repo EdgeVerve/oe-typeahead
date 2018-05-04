@@ -449,7 +449,7 @@ An element which provides suggestions while typing input.
         //self.debounce('valuechanged', function() {
         if (typeof this.value === 'object') {
           this._setSelectedItem(this.value);
-        } else if (this.dataurl && !this.value.startsWith('{{')) {
+        } else if (this.dataurl && this.value && !this.value.startsWith('{{')) {
           var metaAjax = document.createElement('oe-ajax');
           metaAjax.contentType = 'application/json';
           metaAjax.handleAs = 'json';
