@@ -14,8 +14,22 @@
 <link rel="import" href="../oe-i18n-msg/oe-i18n-msg.html">
 
 <!--
+An element which provides suggestions while typing input.
+
+  Example:
+
+    <oe-typeahead label="Search..." searchurl="data/list/SEARCH_STRING.json" dataurl="data/list/VALUE_STRING.json" value="{{value}}"></oe-typeahead>
+
+  Example:
+
+    <oe-typeahead label="Search..." strict searchurl="data/list/SEARCH_STRING.json" dataurl="data/list/VALUE_STRING.json" value="{{value}}"></oe-typeahead>
+
+  Example:
+
+    <oe-typeahead label="Search..." displayproperty="description" valueproperty="code" searchurl="data/country/SEARCH_STRING.json" dataurl="data/country/VALUE_STRING.json" value="{{value}}"></oe-typeahead>
 
 @demo demo/demo-oe-typeahead.html
+@hero hero.svg
 -->
 <dom-module id="oe-typeahead">
   <style>
@@ -23,10 +37,6 @@
       display: block;
     }
 
-    paper-menu {
-      max-height: 240px;
-      overflow: auto;
-    }
 
     paper-item {
       cursor: pointer;
@@ -46,7 +56,10 @@
         background-color: #ccc;
       }
     }
-
+    
+    .dropdown-content > ::content{
+      max-height: 240px;
+    }
   </style>
   <template>
     <oe-ajax id="iajax" auto url=[[_getRequestUrl(searchString)]] last-response={{_suggestions}} on-response="_onAjaxResponse"
@@ -70,7 +83,7 @@
         </template>
       </paper-input-container>
       <div>
-        <iron-dropdown id="dropdown" no-auto-focus opened="{{_suggestions.length}}">
+        <iron-dropdown id="dropdown" no-auto-focus opened="[[_suggestions.length]]">
           <paper-material class="dropdown-content">
             <paper-menu id="menu">
               <template id="itemlist" is="dom-repeat" items="{{_suggestions}}" sort="sortData">
@@ -87,6 +100,90 @@
   <script>
     Polymer({
       is: 'oe-typeahead',
+      properties: {
+        /* Custom user error mesasge */
+        errorMessage: {
+          type: String,
+          notify: true
+        },
+        /* Value which will be displayed on input field */
+        displayValue: {
+          type: String
+        },
+        /* For object, which property to be shown for display in the input field */
+        displayproperty: {
+          type: String
+        },
+        /* For object, which property to be placed as value for typeahead */
+        valueproperty: {
+          type: String
+        },
+        /* Value of the object/string */
+        value: {
+          type: Object,
+          notify: true,
+          observer: '_fetchModel'
+        },
+        /* List of values fetched from server for matching values with given rest API */
+        _suggestions: {
+          type: Array,
+          observer: '_suggestionsChanged'
+        },
+        /* For object, has the whole object of the selection */
+        selectedItem: {
+          type: Object,
+          notify: true
+        },
+        /* Duration between successive requests */
+        debounceDuration: {
+          type: Number,
+          value: 300
+        },
+        /* String using which pattern is matched to get suggested values */
+        searchString: {
+          type: String,
+          notify: true
+        },
+        /* REST API endpoint which will be used to fetch suggested values matching the pattern */
+        searchurl: {
+          type: String
+        },
+        /**
+          * Used during edit of typeahead, this will be used to fetch/search 
+          * for correct object/value with given value 
+          */
+        dataurl: {
+          type: String,
+          observer: '_fetchModel'
+        },
+        disabled: {
+          type: Boolean,
+          notify: true
+        },
+        required: {
+          type: Boolean,
+          notify: true
+        },
+        /** 
+          * Checks for typed value present in the suggestions
+          * If true, throws error if value typed not present in suggested list
+          * If false, allows values not present in suggestions
+          */
+        strict: {
+          type: Boolean,
+          value: false
+        },
+        noDataFound: {
+          type: Boolean,
+          notify: true,
+          value: false
+        }
+      },
+      behaviors: [
+        Polymer.PaperInputBehavior,
+        OEUtils.FieldBehavior,
+        Polymer.Templatizer
+      ],
       listeners: {
         'input.focus': '_onFocus',
         'input.keyup': '_onKeyUp',
@@ -106,10 +203,14 @@
           }
         }
       },
+      /**
+        * Applies when blur event is generated on the element to
+        * validate the value of element.
+        * 
+        * @param {event} e
+        */
       _onBlur: function (e) { // eslint-disable-line no-unused-vars
-        if (!this._suggestions) {
           this.validate();
-        }
       },
       _onFocus: function (e) { // eslint-disable-line no-unused-vars
         this.inputElement.select();
@@ -119,79 +220,18 @@
       },
 
       /**
-       * Returns a reference to the input element.
-       */
+        * Returns a reference to the input element.
+        */
       get inputElement() {
         return this.$.input;
       },
-      properties: {
-        errorMessage: {
-          type: String,
-          notify: true
-        },
-        displayValue: {
-          type: String
-        },
-        displayproperty: {
-          type: String
-        },
-        valueproperty: {
-          type: String
-        },
-        value: {
-          type: Object,
-          notify: true,
-          observer: '_fetchModel'
-        },
-        _suggestions: {
-          type: Array,
-          observer: '_suggestionsChanged'
-        },
-        selectedItem: {
-          type: Object,
-          notify: true
-        },
-        debounceDuration: {
-          type: Number,
-          value: 300
-        },
-        searchString: {
-          type: String,
-          notify: true
-        },
-        searchurl: {
-          type: String
-        },
-        dataurl: {
-          type: String,
-          observer: '_fetchModel'
-        },
-        disabled: {
-          type: Boolean,
-          notify: true
-        },
-        required: {
-          type: Boolean,
-          notify: true
-        },
-        strict: {
-          type: Boolean,
-          value: false
-        },
-        noDataFound: {
-          type: Boolean,
-          notify: true,
-          value: false
-        }
-      },
-      behaviors: [
-        Polymer.PaperInputBehavior,
-        OEUtils.FieldBehavior,
-        Polymer.Templatizer
-      ],
+      /**
+        * Checks response for search/data and sets the noDataFound property
+        */
       _onAjaxResponse: function (e) {
         var self = this;
         if (!e.detail.response || e.detail.response.length == 0) {
+          self.noDataFound = true;
           if (self.strict) {
             self.setValidity(false, 'no-matching-records');
           } else {
@@ -207,10 +247,23 @@
             }
             self._setSelectedItem(newValue);
           }
-          self.noDataFound = true;
-
         } else {
           self.noDataFound = false;
+          var data = e.detail.response;
+          var newValue = data.length===1?data[0]:data.find(function(ele) {
+            if (typeof ele === 'string' && ele === self.searchString) {
+              return true;
+            } else if (typeof ele === 'object' && self.displayproperty 
+              && ele[self.displayproperty] && ele[self.displayproperty] === self.searchString) {
+              return true;
+            } else {
+              return false;
+            }
+          });
+          if (newValue) {
+            self._setSelectedItem(newValue);
+            self.validate();
+          }
         }
       },
       _onAjaxError: function (e) { // eslint-disable-line no-unused-vars
@@ -237,7 +290,7 @@
         var keycode = e.keyCode || e.which || e.key;
 
         if (keycode == 40) {
-          //down button
+          // down key
           var suggestionsMenu = this.$.menu;
           if (suggestionsMenu) {
             var selectedItem = suggestionsMenu.focusedItem;
@@ -250,7 +303,7 @@
           }
           this.inputElement.focus();
         } else if (keycode == 38) {
-          //up
+          // up key
           var suggestionsMenu = this.$.menu; // eslint-disable-line no-redeclare
           if (suggestionsMenu) {
             var selectedItem = suggestionsMenu.focusedItem; // eslint-disable-line no-redeclare
@@ -262,6 +315,7 @@
           }
           this.inputElement.focus();
         } else if (keycode == 13) {
+          // enter key
           var suggestionsMenu = this.$.menu; // eslint-disable-line no-redeclare
           if (suggestionsMenu && typeof (suggestionsMenu) != 'undefined') {
             var selectedItem = suggestionsMenu.focusedItem; // eslint-disable-line no-redeclare
@@ -278,18 +332,27 @@
       _onKeyDown: function (e) {
         var keycode = e.keyCode || e.which || e.key;
         if (keycode == 40 || keycode == 38) {
+          // up/down key
           e.preventDefault();
           e.stopPropagation();
         } else if (e.keyCode == 13 && this._suggestions.length) {
           e.stopPropagation();
+        } else if (e.keyCode == 9 && this._suggestions.length) {
+          this.set('_suggestions',[]);
         }
       },
-      /*When using custom templates, bind it to mouseover event of template component as on-mouseover="onMouseOver"*/
+      /**
+        * When using custom templates, bind it to mouseover event 
+        * of template component as on-mouseover="onMouseOver" 
+        */
       onMouseOver: function (e) {
         this.$.menu.select(e.model.index);
         this.inputElement.focus();
       },
-      /*When using custom templates, bind it to tap event of template component as on-tap="onItemSelected"*/
+      /** 
+        * When using custom templates, bind it to tap event 
+        * of template component as on-tap="onItemSelected"
+        */
       onItemSelected: function (e) {
         this._setSelectedItem(e.model.item);
         this.fire('pt-item-confirmed', e.model.item);
@@ -298,6 +361,11 @@
         });
         e.stopPropagation();
       },
+      /** 
+        * Used to set the selectedItem and value properties
+        *
+        * @param {object} item
+        */
       _setSelectedItem: function (item) {
         this.selectedItem = item;
         this.displayValue = this._getDisplayValue(item);
@@ -306,12 +374,19 @@
           this.value = item ? item[this.valueproperty] : undefined;
         } else {
           this.value = item;
+        } 
+        this.fire('item-selected', item);
+
+        if(!this.multiple){
+          this.$.dropdown.set('opened',false);
         }
 
-        this.set('_suggestions', []);
+        if (this.noDataFound) {
+          this.set('_suggestions', []);
+        }
       },
 
-      /*Revisit getDisplayValue with iron-list template */
+      /* Revisit getDisplayValue with iron-list template */
       _getDisplayValue: function (item) {
         var ret = item;
         if (ret && this.displayproperty) {
@@ -319,6 +394,12 @@
         }
         return ret ? ret.toString() : '';
       },
+      /** 
+        * Used to get the search url after replacing the search pattern
+        *
+        * @param {string} searchString
+        * @returns {string}
+        */
       _getRequestUrl: function (searchString) {
         var re = new RegExp('SEARCH_STRING', 'g');
         var ret = undefined;
@@ -368,7 +449,7 @@
         //self.debounce('valuechanged', function() {
         if (typeof this.value === 'object') {
           this._setSelectedItem(this.value);
-        } else if (this.dataurl && !this.value.startsWith('{{')) {
+        } else if (this.dataurl && this.value && !this.value.startsWith('{{')) {
           var metaAjax = document.createElement('oe-ajax');
           metaAjax.contentType = 'application/json';
           metaAjax.handleAs = 'json';
@@ -412,10 +493,10 @@
           this.$.dropdown.style.width = this.offsetWidth + 'px';
       },
 
-      /*
-       * Sorts data based on displayproperty
-       * Kept method as public so that user can overwrite it if needed
-       */
+      /**
+        * Sorts data based on displayproperty
+        * Kept method as public so that user can overwrite it if needed
+        */
       sortData: function (a, b) {
         return this._getDisplayValue(a) > this._getDisplayValue(b) ? 1 : -1;
       }
