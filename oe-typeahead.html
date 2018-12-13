@@ -185,7 +185,7 @@ An element which provides suggestions while typing input.
         Polymer.Templatizer
       ],
       listeners: {
-        'input.focus': '_onFocus',
+        //'input.focus': '_onFocus',
         'input.keyup': '_onKeyUp',
         'input.keydown': '_onKeyDown',
         'input.input': '_onInput',
@@ -212,9 +212,9 @@ An element which provides suggestions while typing input.
       _onBlur: function (e) { // eslint-disable-line no-unused-vars
           this.validate();
       },
-      _onFocus: function (e) { // eslint-disable-line no-unused-vars
-        this.inputElement.select();
-      },
+      // _onFocus: function (e) { // eslint-disable-line no-unused-vars
+      //   this.inputElement.select();
+      // },
       _onChange: function (e) {
         e.stopPropagation();
       },
@@ -337,9 +337,9 @@ An element which provides suggestions while typing input.
           // up/down key
           e.preventDefault();
           e.stopPropagation();
-        } else if (e.keyCode == 13 && this._suggestions.length) {
+        } else if (e.keyCode == 13 && this._suggestions && this._suggestions.length) {
           e.stopPropagation();
-        } else if (e.keyCode == 9 && this._suggestions.length) {
+        } else if (e.keyCode == 9 && this._suggestions && this._suggestions.length) {
           this.set('_suggestions',[]);
         }else if (e.keyCode == 8){
           //backspace pressed
