@@ -441,7 +441,7 @@ An element which provides suggestions while typing input.
       _fetchModel: function (nVal, oVal) { // eslint-disable-line no-unused-vars
         //Common Observer for dataurl as well as value property.
         //Do not rely on nVal or oVal to be value or dataurl.
-
+		
         if (!this.value || this.value.length === 0) {
           this._setSelectedItem(undefined);
           return;
@@ -467,6 +467,16 @@ An element which provides suggestions while typing input.
           metaAjax.url = this.dataurl.replace(re, encodeURI(this.value));
           metaAjax.addEventListener('response', function (event) {
             var resp = event.detail.response;
+            if (!resp || resp.length == 0) {
+              //Set value as displayValue, (value as cleared, if strict is true otherwise value is not cleared) if response is empty
+			  let tempValue=self.value;
+              if (self.strict) {
+                self.setValidity(false, 'no-matching-records');
+				self._setSelectedItem(undefined);
+              }
+              self.set('displayValue',tempValue);
+            }
+            else{
             if(Array.isArray(resp)){
               //set the first match from response as value
               //if the response is empty sets undefined as the value
@@ -474,6 +484,10 @@ An element which provides suggestions while typing input.
             }else{
               self._setSelectedItem(resp);
             }
+            }
+			
+			self.validate();
+			
           });
           metaAjax.addEventListener('error', function (event) { // eslint-disable-line no-unused-vars
             self._setSelectedItem(undefined);
