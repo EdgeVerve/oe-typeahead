@@ -467,12 +467,24 @@ An element which provides suggestions while typing input.
           metaAjax.url = this.dataurl.replace(re, encodeURI(this.value));
           metaAjax.addEventListener('response', function (event) {
             var resp = event.detail.response;
+            if (!resp || resp.length == 0) {
+              //Set value as displayValue, value as undefined if response is empty
+              if (self.strict) {
+                self.setValidity(false, 'no-matching-records');
+              }
+              let tempValue=self.value;
+              self._setSelectedItem(undefined);
+              self.set('displayValue',tempValue);
+            }
+            else{
             if(Array.isArray(resp)){
               //set the first match from response as value
               //if the response is empty sets undefined as the value
               self._setSelectedItem(resp[0]);
             }else{
               self._setSelectedItem(resp);
+            }
+            self.validate();
             }
           });
           metaAjax.addEventListener('error', function (event) { // eslint-disable-line no-unused-vars
