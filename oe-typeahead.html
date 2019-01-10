@@ -411,7 +411,7 @@ An element which provides suggestions while typing input.
         var re = new RegExp('SEARCH_STRING', 'g');
         var ret = undefined;
         if (this.searchurl) {
-          ret = this.searchurl.replace(re, encodeURI(searchString));
+          ret = this.searchurl.replace(re, encodeURIComponent(searchString));
         }
         return ret;
       },
@@ -466,7 +466,7 @@ An element which provides suggestions while typing input.
           metaAjax.handleAs = 'json';
 
           var re = new RegExp('VALUE_STRING', 'g');
-          metaAjax.url = this.dataurl.replace(re, encodeURI(this.value));
+          metaAjax.url = this.dataurl.replace(re, encodeURIComponent(this.value));
           metaAjax.addEventListener('response', function (event) {
             var resp = event.detail.response;
             if (!resp || resp.length == 0) {
